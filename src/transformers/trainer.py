@@ -811,7 +811,7 @@ class Trainer:
         if self.args.past_index >= 0:
             past = None
 
-        for inputs in tqdm(dataloader, desc=description):
+        for inputs in tqdm(dataloader, desc=description, position=0):
             has_labels = any(inputs.get(k) is not None for k in ["labels", "lm_labels", "masked_lm_labels"])
 
             for k, v in inputs.items():
