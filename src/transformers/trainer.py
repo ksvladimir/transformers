@@ -471,19 +471,20 @@ class Trainer:
         logging_loss = 0.0
         model.zero_grad()
         train_iterator = trange(
-            epochs_trained, int(num_train_epochs), desc="Epoch", disable=not self.is_local_master()
+            epochs_trained, int(num_train_epochs), desc="Epoch", disable=True
         )
         for epoch in train_iterator:
             if isinstance(train_dataloader, DataLoader) and isinstance(train_dataloader.sampler, DistributedSampler):
                 train_dataloader.sampler.set_epoch(epoch)
 
+            epoch_iterator_desc = "Epoch: {}/{} Iteration".format(epoch, int(num_train_epochs))
             if is_torch_tpu_available():
                 parallel_loader = pl.ParallelLoader(train_dataloader, [self.args.device]).per_device_loader(
                     self.args.device
                 )
-                epoch_iterator = tqdm(parallel_loader, desc="Iteration", disable=not self.is_local_master())
+                epoch_iterator = tqdm(parallel_loader, desc=epoch_iterator_desc, disable=not self.is_local_master())
             else:
-                epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=not self.is_local_master())
+                epoch_iterator = tqdm(train_dataloader, desc=epoch_iterator_desc, disable=not self.is_local_master())
 
             # Reset the past mems state at the beginning of each epoch if necessary.
             if self.args.past_index >= 0:
